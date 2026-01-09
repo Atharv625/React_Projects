@@ -2,8 +2,24 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import { color } from "framer-motion";
 
 function App() {
+  const skillset = [
+    {
+      data: "React",
+      emoji: "⚛️",
+      color: "#61dafb",
+    },
+    { data: "JavaScript", emoji: "🟨", color: "#f7df1e" },
+    { data: "HTML", emoji: "📄", color: "#e34c26" },
+    { data: "CSS", emoji: "🎨", color: "#264de4" },
+    {
+      data: "Sex",
+      emoji: "💦💦",
+      color: "#eb4034",
+    },
+  ];
   return (
     <div className="w-[450px] m-10 border-[4px] border-[#222]">
       <img src="jonas.jpeg" alt="Jonas Schmedtmann" className="w-full block" />
@@ -18,10 +34,14 @@ function App() {
         </p>
 
         <div className="flex flex-wrap gap-2 mt-4">
-          <Skill data="React" emoji="⚛️" color="#61dafb" />
-          <Skill data="JavaScript" emoji="🟨" color="#f7df1e" />
-          <Skill data="HTML" emoji="📄" color="#e34c26" />
-          <Skill data="CSS" emoji="🎨" color="#264de4" />
+          {skillset.map((item, index) => (
+            <Skill
+              key={index}
+              data={item.data}
+              color={item.color}
+              emoji={item.emoji}
+            />
+          ))}
         </div>
       </div>
     </div>
