@@ -1,1 +1,72 @@
 @import "tailwindcss";
+
+@tailwind utilities;
+
+/* Global reset */
+* {
+  @apply box-border;
+}
+
+body {
+  @apply font-sans text-[#333];
+}
+
+/* Steps container */
+.steps {
+  @apply w-[600px] bg-[#f7f7f7] rounded-[7px] px-[25px] py-[100px] my-[100px] mx-auto;
+}
+
+/* Numbers row */
+.numbers {
+  @apply flex justify-between;
+}
+
+/* Number circle */
+.numbers > div {
+  @apply h-[40px] aspect-square bg-[#e7e7e7] rounded-full
+         flex items-center justify-center text-[18px];
+}
+
+/* Active number */
+.numbers .active {
+  @apply bg-[#7950f2] text-white;
+}
+
+/* Message section */
+.message {
+  @apply text-center text-[20px] my-[40px] font-bold
+         flex flex-col items-center;
+}
+
+/* Buttons container */
+.buttons {
+  @apply flex justify-between;
+}
+
+/* Buttons */
+.buttons button {
+  @apply border-none cursor-pointer px-[15px] py-[10px]
+         rounded-full text-[14px] font-bold
+         flex items-center gap-[10px];
+}
+
+/* Button icon */
+.buttons button span {
+  @apply text-[16px] leading-none;
+}
+
+/* Heading */
+h3 {
+  @apply m-0 uppercase;
+}
+
+/* Close button */
+.close {
+  @apply absolute top-[16px] right-[16px]
+         border-none bg-transparent cursor-pointer
+         text-[40px] text-inherit;
+}
+
+.close:hover {
+  @apply text-[#7950f2];
+}
