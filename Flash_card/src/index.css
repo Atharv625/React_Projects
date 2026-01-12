@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.selected {
+  border: 1px solid #e03131;
+  background-color: #e03131;
+  color: #fff;
+  font-weight: bold;
+  @apply flex justify-center items-center rounded-2xl
+}
