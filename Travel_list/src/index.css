@@ -17,8 +17,10 @@ html {
 }
 
 body {
-  @apply text-[2.4rem] font-medium text-[#5a3e2b] font-sans;
+  @apply text-[2.4rem]  text-[#5a3e2b] font-sans;
   font-family: "Quicksand", sans-serif;
+  
+    font-weight: 500;
   
 }
 
@@ -37,17 +39,19 @@ h1 {
 }
 
 .add-form {
-  @apply bg-[#e5771f] py-[2.8rem] flex items-center justify-center gap-[0.8rem] overflow-hidden;
+  @apply bg-[#e5771f] py-[2.8rem] flex items-center justify-center gap-[0.8rem];
+  overflow: auto;
+  scrollbar-width: none;
 }
 
-.add-form {
-  overflow: auto;
-  scrollbar-width: none;          /* Firefox */
-}
 
 .add-form::-webkit-scrollbar {
   display: none;                  /* Chrome, Edge, Safari */
 }
+.add-form input,select {
+  @apply border border-red-400 focus:border-red-600 focus:outline-none focus:border-2;
+}
+
 h3 {
   @apply mr-[1.6rem] text-[2.4rem];
 }

@@ -1,5 +1,5 @@
 import { div, h1, option } from "framer-motion/client";
-import React from "react";
+import React, { useState } from "react";
 import "./index.css";
 const App = () => {
   const initial = [
@@ -11,21 +11,49 @@ const App = () => {
     { id: 6, desc: "Phone Charger & Power Bank", quantity: 1, packed: false },
   ];
 
+  const [items, setItems] = useState(initial);
   function Logo() {
     return <h1>🌴 Far Away 💼</h1>;
   }
   function Form() {
+    const [desc, setDesc] = useState("");
+    const [quantity, setQuantity] = useState(1);
+    function handleSubmit(e) {
+      e.preventDefault();
+      if (!desc) return;
+      const newItem = { desc, quantity, packed: false, id: Date.now() };
+      console.log(newItem);
+      setItems((prevItems) => [...prevItems, newItem]);
+      setDesc("");
+      setQuantity(1);
+    }
     return (
-      <form className="add-form">
+      <form className="add-form" onSubmit={handleSubmit}>
         <h3>What do you need for Your 🤑 trip?</h3>
-        <select name="" id="">
+        <select
+          name=""
+          id=""
+          value={quantity}
+          onChange={(e) => {
+            console.log(e.target.value);
+            setQuantity(Number(e.target.value));
+          }}
+        >
           {Array.from({ length: 20 }, (_, i) => i + 1).map((num) => (
             <option value={num} key={num}>
               {num}
             </option>
           ))}
         </select>
-        <input type="text" placeholder="Item..." />
+        <input
+          type="text"
+          placeholder="Item..."
+          value={desc}
+          onChange={(e) => {
+            console.log(e.target.value);
+            setDesc(e.target.value);
+          }}
+        />
         <button>Add</button>
       </form>
     );
@@ -34,7 +62,7 @@ const App = () => {
     return (
       <div className="list">
         <ul>
-          {initial.map((item) => (
+          {items.map((item) => (
             <Item item={item} key={item.id} />
           ))}
         </ul>
