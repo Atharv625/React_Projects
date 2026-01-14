@@ -96,10 +96,10 @@ input {
 }
 
 /* Checkbox */
-input[type="checkbox"] {
+/* input[type="checkbox"] {
   @apply h-[2rem] w-[2rem];
   accent-color: #e5771f; /* ❗ not supported by Tailwind */
-}
+/* } */ 
 
 /* Delete button */
 .list li button {

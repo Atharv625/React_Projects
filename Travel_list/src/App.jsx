@@ -1,9 +1,9 @@
 import { div, h1, option } from "framer-motion/client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./index.css";
 const App = () => {
   const initial = [
-    { id: 1, desc: "Passport", quantity: 2, packed: true },
+    { id: 1, desc: "Passport", quantity: 2, packed: false },
     { id: 2, desc: "Flight Tickets", quantity: 1, packed: false },
     { id: 3, desc: "Travel Insurance Documents", quantity: 1, packed: false },
     { id: 4, desc: "Clothes", quantity: 7, packed: false },
@@ -11,10 +11,49 @@ const App = () => {
     { id: 6, desc: "Phone Charger & Power Bank", quantity: 1, packed: false },
   ];
 
-  const [items, setItems] = useState(initial);
+  const [items, setItems] = useState(() => {
+    const storedItems = localStorage.getItem("packingItems");
+    return storedItems ? JSON.parse(storedItems) : initial;
+  });
+  useEffect(() => {
+    localStorage.setItem("packingItems", JSON.stringify(items));
+  }, [items]);
+
   function Logo() {
     return <h1>🌴 Far Away 💼</h1>;
   }
+  function handleToggle(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+  function handleDelete(id) {
+    setItems((items) => items.filter((item) => item.id !== id));
+  }
+  function handleSort(type) {
+    if (type === "input") {
+      setItems(initial);
+    }
+
+    if (type === "desc") {
+      setItems((items) =>
+        [...items].sort((a, b) => a.desc.localeCompare(b.desc))
+      );
+    }
+
+    if (type === "packed") {
+      setItems((items) =>
+        [...items].sort((a, b) => Number(a.packed) - Number(b.packed))
+      );
+    }
+
+    if (type === "quantity") {
+      setItems((items) => [...items].sort((a, b) => b.quantity - a.quantity));
+    }
+  }
+
   function Form() {
     const [desc, setDesc] = useState("");
     const [quantity, setQuantity] = useState(1);
@@ -63,36 +102,75 @@ const App = () => {
       <div className="list">
         <ul>
           {items.map((item) => (
-            <Item item={item} key={item.id} />
+            <li key={item.id}>
+              <input
+                type="checkbox"
+                className="scale-150 accent-[#e5771f]"
+                checked={item.packed}
+                onChange={() => handleToggle(item.id)}
+              />
+              <Item item={item} onDelete={handleDelete} />
+            </li>
           ))}
         </ul>
+        {items.length !== 0 && (
+          <div className="flex justify-end items-center gap-4 mt-4">
+            <select
+              className="px-3 py-1 border rounded"
+              onChange={(e) => handleSort(e.target.value)}
+            >
+              <option value="input">Sort items</option>
+              <option value="desc">Sort by Description</option>
+              <option value="packed">Sort by Packed</option>
+              <option value="quantity">Sort by Quantity</option>
+            </select>
+
+            <button onClick={Reset} className="px-3 py-1">
+              Reset
+            </button>
+          </div>
+        )}
       </div>
     );
   }
   function States() {
+    const totalItems = items.length;
+    const packedItems = items.filter((item) => item.packed).length;
+    const percentage =
+      totalItems === 0 ? 0 : Math.round((packedItems / totalItems) * 100);
+
     return (
-      <>
-        <footer className="stats">
-          <em>💼 You have X items on your list, and you already packed</em>
-        </footer>
-      </>
+      <footer className="stats">
+        <em>
+          💼 You have {totalItems} items on your list, and you already packed{" "}
+          {packedItems} ({percentage}%)
+        </em>
+      </footer>
     );
   }
-  function Item({ item }) {
+
+  function Item({ item, onDelete }) {
     return (
-      <li>
+      <>
         <span style={item.packed ? { textDecoration: "line-through" } : {}}>
           {item.quantity} {item.desc}
         </span>
-        <button>❌</button>
-      </li>
+
+        {!item.packed && <button onClick={() => onDelete(item.id)}>❌</button>}
+      </>
     );
+  }
+
+  function Reset() {
+    setItems([]);
+    localStorage.removeItem("packingItems");
   }
   return (
     <>
       <Logo />
       <Form />
       <PackingList />
+
       <States />
     </>
   );
