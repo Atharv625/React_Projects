@@ -49,46 +49,60 @@ const tempWatchedData = [
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+ export default function App() {
+   const [movies, setMovies] = useState(tempMovieData);
+   const [watched, setWatched] = useState(tempWatchedData);
+   const [isOpen1, setIsOpen1] = useState(true);
 
-export default function App() {
+   const avgImdbRating = average(watched.map((m) => m.imdbRating));
+   const avgUserRating = average(watched.map((m) => m.userRating));
+   const avgRuntime = average(watched.map((m) => m.runtime));
+   const [query, setQuery] = useState("");
+
+   return (
+     <>
+       <Nav movies={movies} query={query} setQuery={setQuery} />
+       <Main
+         movies={movies}
+         watched={watched}
+         isOpen1={isOpen1}
+         setIsOpen1={setIsOpen1}
+         avgImdbRating={avgImdbRating}
+         avgUserRating={avgUserRating}
+         avgRuntime={avgRuntime}
+       />
+     </>
+   );
+ }
+
+
+function Search({ query, setQuery }) {
   return (
-    <>
-      <Nav />
-      <Main />
-    </>
+    <input
+      className="search"
+      type="text"
+      placeholder="Search movies..."
+      value={query}
+      onChange={(e) => setQuery(e.target.value)}
+    />
   );
 }
 
-function Search() {
-  const [query, setQuery] = useState("");
+function Nav({ movies, query, setQuery }) {
   return (
-    <>
-      <input
-        className="search"
-        type="text"
-        placeholder="Search movies..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-    </>
+    <nav className="nav-bar">
+      <Logo />
+      <Search query={query} setQuery={setQuery} />
+      <NumResults movies={movies} />
+    </nav>
   );
 }
-function Nav() {
-  return (
-    <>
-      <nav className="nav-bar">
-        <Logo />
-        <Search />
-        <NumResults />
-      </nav>
-    </>
-  );
-}
-function NumResults() {
+
+function NumResults({ movies }) {
   return (
     <>
       <p className="num-results">
-        Found <strong>X</strong> results
+        Found <strong>{movies.length}</strong> results
       </p>
     </>
   );
@@ -101,33 +115,33 @@ function Logo() {
     </div>
   );
 }
-function Main() {
-  const [movies, setMovies] = useState(tempMovieData);
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [isOpen1, setIsOpen1] = useState(true);
-
-  const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
-  const avgUserRating = average(watched.map((movie) => movie.userRating));
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
+function Main({
+  movies,
+  watched,
+  isOpen1,
+  setIsOpen1,
+  avgImdbRating,
+  avgUserRating,
+  avgRuntime,
+}) {
   return (
-    <>
-      {" "}
-      <main className="main">
-        <ListBox
-          movies={movies}
-          isOpen={isOpen1}
-          onToggle={() => setIsOpen1((open) => !open)}
-        />
-        <WatchBox
-          watched={watched}
-          avgImdbRating={avgImdbRating}
-          avgUserRating={avgUserRating}
-          avgRuntime={avgRuntime}
-        />
-      </main>
-    </>
+    <main className="main">
+      <ListBox
+        movies={movies}
+        isOpen={isOpen1}
+        onToggle={() => setIsOpen1((open) => !open)}
+      />
+
+      <WatchBox
+        watched={watched}
+        avgImdbRating={avgImdbRating}
+        avgUserRating={avgUserRating}
+        avgRuntime={avgRuntime}
+      />
+    </main>
   );
 }
+
 
 function ListBox({ movies, isOpen, onToggle }) {
   return (
@@ -136,13 +150,12 @@ function ListBox({ movies, isOpen, onToggle }) {
         {isOpen ? "–" : "+"}
       </button>
 
-      {isOpen && <MovieList />}
+      {isOpen && <MovieList movies={movies} />}
     </div>
   );
 }
-function MovieList() {
-  const [movies, setMovies] = useState(tempMovieData);
 
+function MovieList({ movies }) {
   return (
     <ul className="list">
       {movies.map((movie) => (
@@ -151,6 +164,7 @@ function MovieList() {
     </ul>
   );
 }
+
 function Movie({ movie }) {
   return (
     <li key={movie.imdbID}>
