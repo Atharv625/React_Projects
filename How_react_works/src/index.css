@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* Global */
+body {
+  @apply font-sans relative text-[#444] my-12 mx-24;
+}
+
+/* Buttons (base) */
+button {
+  @apply  text-inherit border-0 cursor-pointer;
+}
+
+/* Toggle button */
+.toggle {
+  @apply absolute right-0 bg-transparent text-[30px] p-1;
+}
+
+/* Tabs wrapper */
+.tabs {
+  @apply mb-2;
+}
+
+/* Individual tab */
+.tab {
+  @apply rounded-xl bg-[#edf2ff] px-6 py-3 mr-2
+         text-base font-bold text-[#364fc7]
+         transition-all duration-300;
+}
+
+/* Active & hover tab */
+.tab.active,
+.tab:hover {
+  @apply bg-[#364fc7] text-white;
+}
+
+/* Tab content */
+.tab-content {
+  @apply bg-[#edf2ff] p-8 rounded-xl;
+}
+
+/* Tab content heading */
+.tab-content h4 {
+  @apply text-xl mb-4 text-[#364fc7];
+}
+
+/* Tab content paragraph */
+.tab-content p {
+  @apply text-lg;
+}
+
+/* Tab actions */
+.tab-actions {
+  @apply flex justify-between mt-4 mb-6;
+}
+
+/* Tab action buttons */
+.tab-actions > button {
+  @apply bg-transparent underline text-[#4c6ef5] text-sm;
+}
+
+/* Hearts counter */
+.hearts-counter {
+  @apply flex items-center gap-2;
+}
+
+/* Hearts counter button */
+.hearts-counter button {
+  @apply bg-[#f03e3e] px-1.5 py-1 rounded text-white leading-none;
+}
+
+/* Undo buttons container */
+.tab-undo {
+  @apply flex gap-2;
+}
+
+/* Undo buttons */
+.tab-undo button {
+  @apply bg-[#364fc7] text-white px-3 py-1.5 rounded;
+}
