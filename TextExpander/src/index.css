@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+
+body {
+  @apply font-sans;
+}
+
+.box {
+    @apply p-[10px] border border-[#ccc] rounded-[7px] bg-[#f7f7f7];
+
+}
