@@ -49,10 +49,18 @@ const tempWatchedData = [
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+const apiKey = import.meta.env.VITE_OMDB_API_KEY;
+
+
  export default function App() {
-   const [movies, setMovies] = useState(tempMovieData);
-   const [watched, setWatched] = useState(tempWatchedData);
+   const [movies, setMovies] = useState([]);
+   const [watched, setWatched] = useState([]);
    const [isOpen1, setIsOpen1] = useState(true);
+
+   // console.log(apiKey);
+   fetch(`https://www.omdbapi.com/?apikey=${apiKey}&s=animal`)
+     .then((res) => res.json())
+     .then((data) => setMovies(data.Search));
 
    const avgImdbRating = average(watched.map((m) => m.imdbRating));
    const avgUserRating = average(watched.map((m) => m.userRating));
