@@ -396,3 +396,15 @@ EMPTY STAR
 </svg>
 
 */
+.loader {
+  text-align: center;
+  font-size: 1.8rem;
+  padding: 2rem;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 0.3; }
+}

@@ -48,30 +48,55 @@ const tempWatchedData = [
 ];
 
 const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+  arr.length === 0 ? 0 : arr.reduce((acc, cur) => acc + cur, 0) / arr.length;
+
 const apiKey = import.meta.env.VITE_OMDB_API_KEY;
 
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+ const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen1, setIsOpen1] = useState(true);
-  const movie = "animal";
-  useEffect(function () {
-    async function fetchMovies() {
-      const res = await fetch(
-        `https://www.omdbapi.com/?apikey=${apiKey}&s=${movie}`,
-      );
-      const data = await res.json();
-      setMovies(data.Search);
-    }
-    fetchMovies();
-  }, []);
-  // console.log(apiKey);
+   const [query, setQuery] = useState("");
+   const [isLoading, setIsLoading] = useState(false);
 
-  const avgImdbRating = average(watched.map((m) => m.imdbRating));
-  const avgUserRating = average(watched.map((m) => m.userRating));
-  const avgRuntime = average(watched.map((m) => m.runtime));
-  const [query, setQuery] = useState("");
+   useEffect(() => {
+     async function fetchMovies() {
+       if (!query) {
+         setMovies([]);
+         setIsLoading(false);
+         return;
+       }
+
+       try {
+         setIsLoading(true); // ✅ START loader
+
+         const res = await fetch(
+           `https://www.omdbapi.com/?apikey=${apiKey}&s=${query}`,
+         );
+         const data = await res.json();
+
+         if (data.Response === "True") {
+           setMovies(data.Search);
+         } else {
+           setMovies([]);
+         }
+       } catch (err) {
+         console.error(err);
+         setMovies([]);
+       } finally {
+         setIsLoading(false); // ✅ ALWAYS stop loader
+       }
+     }
+
+     fetchMovies();
+   }, [query]);
+
+   // console.log(apiKey);
+
+   const avgImdbRating = average(watched.map((m) => m.imdbRating));
+   const avgUserRating = average(watched.map((m) => m.userRating));
+   const avgRuntime = average(watched.map((m) => m.runtime));
+ 
 
   return (
     <>
@@ -84,6 +109,7 @@ export default function App() {
         avgImdbRating={avgImdbRating}
         avgUserRating={avgUserRating}
         avgRuntime={avgRuntime}
+        isLoading={isLoading}
       />
     </>
   );
@@ -136,6 +162,7 @@ function Main({
   avgImdbRating,
   avgUserRating,
   avgRuntime,
+  isLoading,
 }) {
   return (
     <main className="main">
@@ -143,6 +170,7 @@ function Main({
         movies={movies}
         isOpen={isOpen1}
         onToggle={() => setIsOpen1((open) => !open)}
+        isLoading={isLoading}
       />
 
       <WatchBox
@@ -155,14 +183,14 @@ function Main({
   );
 }
 
-function ListBox({ movies, isOpen, onToggle }) {
+function ListBox({ movies, isOpen, onToggle, isLoading }) {
   return (
     <div className="box">
       <button className="btn-toggle" onClick={onToggle}>
         {isOpen ? "–" : "+"}
       </button>
 
-      {isOpen && <MovieList movies={movies} />}
+      {isOpen && (isLoading ? <Loader /> : <MovieList movies={movies} />)}
     </div>
   );
 }
@@ -241,4 +269,7 @@ function WatchBox({ watched, avgImdbRating, avgUserRating, avgRuntime }) {
       )}
     </div>
   );
+}
+function Loader() {
+  return <p className="loader">Loading...</p>;
 }
