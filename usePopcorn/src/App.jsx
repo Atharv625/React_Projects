@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const tempMovieData = [
   {
@@ -51,38 +51,43 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 const apiKey = import.meta.env.VITE_OMDB_API_KEY;
 
+export default function App() {
+  const [movies, setMovies] = useState([]);
+  const [watched, setWatched] = useState([]);
+  const [isOpen1, setIsOpen1] = useState(true);
+  const movie = "animal";
+  useEffect(function () {
+    async function fetchMovies() {
+      const res = await fetch(
+        `https://www.omdbapi.com/?apikey=${apiKey}&s=${movie}`,
+      );
+      const data = await res.json();
+      setMovies(data.Search);
+    }
+    fetchMovies();
+  }, []);
+  // console.log(apiKey);
 
- export default function App() {
-   const [movies, setMovies] = useState([]);
-   const [watched, setWatched] = useState([]);
-   const [isOpen1, setIsOpen1] = useState(true);
+  const avgImdbRating = average(watched.map((m) => m.imdbRating));
+  const avgUserRating = average(watched.map((m) => m.userRating));
+  const avgRuntime = average(watched.map((m) => m.runtime));
+  const [query, setQuery] = useState("");
 
-   // console.log(apiKey);
-   fetch(`https://www.omdbapi.com/?apikey=${apiKey}&s=animal`)
-     .then((res) => res.json())
-     .then((data) => setMovies(data.Search));
-
-   const avgImdbRating = average(watched.map((m) => m.imdbRating));
-   const avgUserRating = average(watched.map((m) => m.userRating));
-   const avgRuntime = average(watched.map((m) => m.runtime));
-   const [query, setQuery] = useState("");
-
-   return (
-     <>
-       <Nav movies={movies} query={query} setQuery={setQuery} />
-       <Main
-         movies={movies}
-         watched={watched}
-         isOpen1={isOpen1}
-         setIsOpen1={setIsOpen1}
-         avgImdbRating={avgImdbRating}
-         avgUserRating={avgUserRating}
-         avgRuntime={avgRuntime}
-       />
-     </>
-   );
- }
-
+  return (
+    <>
+      <Nav movies={movies} query={query} setQuery={setQuery} />
+      <Main
+        movies={movies}
+        watched={watched}
+        isOpen1={isOpen1}
+        setIsOpen1={setIsOpen1}
+        avgImdbRating={avgImdbRating}
+        avgUserRating={avgUserRating}
+        avgRuntime={avgRuntime}
+      />
+    </>
+  );
+}
 
 function Search({ query, setQuery }) {
   return (
@@ -149,7 +154,6 @@ function Main({
     </main>
   );
 }
-
 
 function ListBox({ movies, isOpen, onToggle }) {
   return (
