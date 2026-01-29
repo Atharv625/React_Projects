@@ -54,49 +54,52 @@ const apiKey = import.meta.env.VITE_OMDB_API_KEY;
 
 export default function App() {
   const [movies, setMovies] = useState([]);
- const [watched, setWatched] = useState(tempWatchedData);
+  const [watched, setWatched] = useState(tempWatchedData);
   const [isOpen1, setIsOpen1] = useState(true);
-   const [query, setQuery] = useState("");
-   const [isLoading, setIsLoading] = useState(false);
+  const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    async function fetchMovies() {
+      if (query.length < 3) {
+        setMovies([]);
+        setIsLoading(false);
+        setError(false);
+        return;
+      }
 
-   useEffect(() => {
-     async function fetchMovies() {
-       if (!query) {
-         setMovies([]);
-         setIsLoading(false);
-         return;
-       }
+      try {
+        setError(false);
+        setIsLoading(true);
+        // ✅ START loader
 
-       try {
-         setIsLoading(true); // ✅ START loader
+        const res = await fetch(
+          `https://www.omdbapi.com/?apikey=${apiKey}&s=${query}`,
+        );
+        const data = await res.json();
 
-         const res = await fetch(
-           `https://www.omdbapi.com/?apikey=${apiKey}&s=${query}`,
-         );
-         const data = await res.json();
+        if (data.Response === "True") {
+          setMovies(data.Search);
+        } else {
+          setMovies([]);
+          setError(true);
+        }
+      } catch (err) {
+        console.error(err);
+        setMovies([]);
+      } finally {
+        setIsLoading(false); // ✅ ALWAYS stop loader
+      }
+    }
 
-         if (data.Response === "True") {
-           setMovies(data.Search);
-         } else {
-           setMovies([]);
-         }
-       } catch (err) {
-         console.error(err);
-         setMovies([]);
-       } finally {
-         setIsLoading(false); // ✅ ALWAYS stop loader
-       }
-     }
+    fetchMovies();
+  }, [query]);
 
-     fetchMovies();
-   }, [query]);
+  // console.log(apiKey);
 
-   // console.log(apiKey);
-
-   const avgImdbRating = average(watched.map((m) => m.imdbRating));
-   const avgUserRating = average(watched.map((m) => m.userRating));
-   const avgRuntime = average(watched.map((m) => m.runtime));
- 
+  const avgImdbRating = average(watched.map((m) => m.imdbRating));
+  const avgUserRating = average(watched.map((m) => m.userRating));
+  const avgRuntime = average(watched.map((m) => m.runtime));
 
   return (
     <>
@@ -110,6 +113,7 @@ export default function App() {
         avgUserRating={avgUserRating}
         avgRuntime={avgRuntime}
         isLoading={isLoading}
+        isError={error}
       />
     </>
   );
@@ -163,6 +167,7 @@ function Main({
   avgUserRating,
   avgRuntime,
   isLoading,
+  isError,
 }) {
   return (
     <main className="main">
@@ -171,6 +176,7 @@ function Main({
         isOpen={isOpen1}
         onToggle={() => setIsOpen1((open) => !open)}
         isLoading={isLoading}
+        isError={isError}
       />
 
       <WatchBox
@@ -183,14 +189,19 @@ function Main({
   );
 }
 
-function ListBox({ movies, isOpen, onToggle, isLoading }) {
+function ListBox({ movies, isOpen, onToggle, isLoading, isError }) {
   return (
     <div className="box">
       <button className="btn-toggle" onClick={onToggle}>
         {isOpen ? "–" : "+"}
       </button>
-
-      {isOpen && (isLoading ? <Loader /> : <MovieList movies={movies} />)}
+      {isOpen && (
+        <>
+          {isLoading && <Loader />}
+          {!isLoading && isError && <Error />}
+          {!isLoading && !isError && <MovieList movies={movies} />}
+        </>
+      )}
     </div>
   );
 }
@@ -272,4 +283,13 @@ function WatchBox({ watched, avgImdbRating, avgUserRating, avgRuntime }) {
 }
 function Loader() {
   return <p className="loader">Loading...</p>;
+}
+
+function Error() {
+  return (
+    <p className="text-4xl flex justify-center items-center">
+      {" "}
+      ⚔️ Movie Not Found🚩
+    </p>
+  );
 }
