@@ -59,7 +59,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [selectedId, setSelectedId] = useState("tt1375666");
+  const [selectedId, setSelectedId] = useState();
   useEffect(() => {
     async function fetchMovies() {
       if (query.length < 3) {
@@ -186,7 +186,10 @@ function Main({
       />
 
       {selectedId ? (
-        <SelectedMovie selectedId={selectedId} />
+        <SelectedMovie
+          selectedId={selectedId}
+          onClose={() => setSelectedId(null)}
+        />
       ) : (
         <WatchBox
           watched={watched}
@@ -199,7 +202,14 @@ function Main({
   );
 }
 
-function ListBox({ movies, isOpen, onToggle, isLoading, isError }) {
+function ListBox({
+  movies,
+  isOpen,
+  onToggle,
+  isLoading,
+  isError,
+  onSelectMovie,
+}) {
   return (
     <div className="box">
       <button className="btn-toggle" onClick={onToggle}>
@@ -209,7 +219,9 @@ function ListBox({ movies, isOpen, onToggle, isLoading, isError }) {
         <>
           {isLoading && <Loader />}
           {!isLoading && isError && <Error />}
-          {!isLoading && !isError && <MovieList movies={movies} />}
+          {!isLoading && !isError && (
+            <MovieList movies={movies} onSelectMovie={onSelectMovie} />
+          )}
         </>
       )}
     </div>
@@ -245,7 +257,10 @@ function WatchBox({ watched, avgImdbRating, avgUserRating, avgRuntime }) {
     <div className="box">
       <button
         className="btn-toggle"
-        onClick={() => setIsOpen2((open) => !open)}
+        onClick={() => {
+          setIsOpen2((open) => !open);
+          setSelectedId(null);
+        }}
       >
         {isOpen2 ? "–" : "+"}
       </button>
@@ -304,9 +319,12 @@ function Error() {
   );
 }
 
-function SelectedMovie({ selectedId }) {
+function SelectedMovie({ selectedId, onClose }) {
   return (
-    <div className="details">
+    <div className="box">
+      <button className="btn-toggle" onClick={onClose}>
+        &larr;
+      </button>
       <h2>Selected Movie ID:</h2>
       <p>{selectedId}</p>
     </div>
