@@ -59,6 +59,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [selectedId, setSelectedId] = useState("tt1375666");
   useEffect(() => {
     async function fetchMovies() {
       if (query.length < 3) {
@@ -114,6 +115,8 @@ export default function App() {
         avgRuntime={avgRuntime}
         isLoading={isLoading}
         isError={error}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
       />
     </>
   );
@@ -168,6 +171,8 @@ function Main({
   avgRuntime,
   isLoading,
   isError,
+  selectedId,
+  setSelectedId,
 }) {
   return (
     <main className="main">
@@ -177,14 +182,19 @@ function Main({
         onToggle={() => setIsOpen1((open) => !open)}
         isLoading={isLoading}
         isError={isError}
+        onSelectMovie={setSelectedId}
       />
 
-      <WatchBox
-        watched={watched}
-        avgImdbRating={avgImdbRating}
-        avgUserRating={avgUserRating}
-        avgRuntime={avgRuntime}
-      />
+      {selectedId ? (
+        <SelectedMovie selectedId={selectedId} />
+      ) : (
+        <WatchBox
+          watched={watched}
+          avgImdbRating={avgImdbRating}
+          avgUserRating={avgUserRating}
+          avgRuntime={avgRuntime}
+        />
+      )}
     </main>
   );
 }
@@ -206,19 +216,19 @@ function ListBox({ movies, isOpen, onToggle, isLoading, isError }) {
   );
 }
 
-function MovieList({ movies }) {
+function MovieList({ movies, onSelectMovie }) {
   return (
     <ul className="list">
       {movies.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie movie={movie} key={movie.imdbID} onSelectMovie={onSelectMovie} />
       ))}
     </ul>
   );
 }
 
-function Movie({ movie }) {
+function Movie({ movie, onSelectMovie }) {
   return (
-    <li key={movie.imdbID}>
+    <li onClick={() => onSelectMovie(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <p>
@@ -227,6 +237,7 @@ function Movie({ movie }) {
     </li>
   );
 }
+
 function WatchBox({ watched, avgImdbRating, avgUserRating, avgRuntime }) {
   const [isOpen2, setIsOpen2] = useState(true);
 
@@ -262,7 +273,6 @@ function WatchBox({ watched, avgImdbRating, avgUserRating, avgRuntime }) {
               </p>
             </div>
           </div>
-
           <ul className="list">
             {watched.map((movie) => (
               <li key={movie.imdbID}>
@@ -291,5 +301,14 @@ function Error() {
       {" "}
       ⚔️ Movie Not Found🚩
     </p>
+  );
+}
+
+function SelectedMovie({ selectedId }) {
+  return (
+    <div className="details">
+      <h2>Selected Movie ID:</h2>
+      <p>{selectedId}</p>
+    </div>
   );
 }
