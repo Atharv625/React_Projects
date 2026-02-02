@@ -1,5 +1,7 @@
+import { title } from "framer-motion/client";
 import { useEffect, useState } from "react";
 
+import StarRating from "./Component/StarRating";
 const tempMovieData = [
   {
     imdbID: "tt1375666",
@@ -58,19 +60,19 @@ export default function App() {
   const [isOpen1, setIsOpen1] = useState(true);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState();
   useEffect(() => {
     async function fetchMovies() {
       if (query.length < 3) {
         setMovies([]);
         setIsLoading(false);
-        setError(false);
+        setError("");
         return;
       }
 
       try {
-        setError(false);
+        setError("");
         setIsLoading(true);
         // ✅ START loader
 
@@ -83,7 +85,7 @@ export default function App() {
           setMovies(data.Search);
         } else {
           setMovies([]);
-          setError(true);
+          setError("Something went wrong");
         }
       } catch (err) {
         console.error(err);
@@ -196,6 +198,7 @@ function Main({
           avgImdbRating={avgImdbRating}
           avgUserRating={avgUserRating}
           avgRuntime={avgRuntime}
+          setSelectedId={setSelectedId}
         />
       )}
     </main>
@@ -250,7 +253,13 @@ function Movie({ movie, onSelectMovie }) {
   );
 }
 
-function WatchBox({ watched, avgImdbRating, avgUserRating, avgRuntime }) {
+function WatchBox({
+  watched,
+  avgImdbRating,
+  avgUserRating,
+  avgRuntime,
+  setSelectedId,
+}) {
   const [isOpen2, setIsOpen2] = useState(true);
 
   return (
@@ -259,7 +268,6 @@ function WatchBox({ watched, avgImdbRating, avgUserRating, avgRuntime }) {
         className="btn-toggle"
         onClick={() => {
           setIsOpen2((open) => !open);
-          setSelectedId(null);
         }}
       >
         {isOpen2 ? "–" : "+"}
@@ -318,15 +326,102 @@ function Error() {
     </p>
   );
 }
-
 function SelectedMovie({ selectedId, onClose }) {
+  const [movie, setMovie] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const {
+    Title: title,
+    Poster: poster,
+    Runtime: runTime,
+    imdbRating,
+    Plot: plot,
+    Released: released,
+    Actors: actors,
+    Director: director,
+    Genre: genre,
+  } = movie;
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function getMovieDetails() {
+      try {
+        setIsLoading(true);
+        setError("");
+
+        const res = await fetch(
+          `https://www.omdbapi.com/?apikey=${apiKey}&i=${selectedId}`,
+          { signal: controller.signal },
+        );
+        const data = await res.json();
+
+        if (data.Response === "False") throw new Error(data.Error);
+
+        setMovie(data);
+      } catch (err) {
+        if (err.name !== "AbortError") setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    getMovieDetails();
+    return () => controller.abort();
+  }, [selectedId]);
+
+  useEffect(() => {
+    function handleKey(e) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
+  if (isLoading) return <Loader />;
+  if (error) return <Error message={error} />;
+
   return (
-    <div className="box">
-      <button className="btn-toggle" onClick={onClose}>
-        &larr;
-      </button>
-      <h2>Selected Movie ID:</h2>
-      <p>{selectedId}</p>
+    <div className="box details">
+      <header className="details-header flex gap-6">
+        <button className="btn-toggle" onClick={onClose} aria-label="Go back">
+          &larr;
+        </button>
+
+        <img
+          src={poster}
+          alt={`Poster of ${title}`}
+          className="w-1/3 rounded-lg object-cover"
+        />
+
+        <div className="details-overview space-y-2">
+          <h2 className="text-2xl font-semibold">{title}</h2>
+          <p className="text-sm text-gray-300">
+            {released} • {runTime}
+          </p>
+          <p className="text-sm text-gray-300">{genre}</p>
+          <p className="font-semibold">⭐ {imdbRating}</p>
+        </div>
+      </header>
+
+      <section className="p-6 space-y-4">
+        <div className="rating">
+          <StarRating maxRating={10} />
+        </div>
+
+        <p className="text-sm leading-relaxed">
+          <em>{plot}</em>
+        </p>
+
+        <p className="text-sm">
+          <span className="text-gray-400">Starring:</span> {actors}
+        </p>
+
+        <p className="text-sm">
+          <span className="text-gray-400">Directed by:</span> {director}
+        </p>
+      </section>
     </div>
   );
 }
