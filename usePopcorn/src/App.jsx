@@ -56,12 +56,23 @@ const apiKey = import.meta.env.VITE_OMDB_API_KEY;
 
 export default function App() {
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState(tempWatchedData);
+   const [watched, setWatched] = useState(() => {
+     const stored = localStorage.getItem("watched");
+     return stored ? JSON.parse(stored) : tempWatchedData;
+   });
   const [isOpen1, setIsOpen1] = useState(true);
   const [query, setQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [selectedId, setSelectedId] = useState();
+    function handleAddWatched(movie) {
+      setWatched((watched) => [...watched, movie]);
+      setSelectedId(null); // close details view
+    }
+    useEffect(() => {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    }, [watched]);
+
   useEffect(() => {
     async function fetchMovies() {
       if (query.length < 3) {
@@ -119,6 +130,7 @@ export default function App() {
         isError={error}
         selectedId={selectedId}
         setSelectedId={setSelectedId}
+        onAddWatched={handleAddWatched}
       />
     </>
   );
@@ -175,6 +187,7 @@ function Main({
   isError,
   selectedId,
   setSelectedId,
+  onAddWatched,
 }) {
   return (
     <main className="main">
@@ -191,6 +204,7 @@ function Main({
         <SelectedMovie
           selectedId={selectedId}
           onClose={() => setSelectedId(null)}
+          onAddWatched={onAddWatched}
         />
       ) : (
         <WatchBox
@@ -204,6 +218,7 @@ function Main({
     </main>
   );
 }
+
 
 function ListBox({
   movies,
@@ -326,10 +341,11 @@ function Error() {
     </p>
   );
 }
-function SelectedMovie({ selectedId, onClose }) {
+function SelectedMovie({ selectedId, onClose, onAddWatched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [userRating, setUserRating] = useState(0);
 
   const {
     Title: title,
@@ -342,7 +358,19 @@ function SelectedMovie({ selectedId, onClose }) {
     Director: director,
     Genre: genre,
   } = movie;
+  function handleAdd() {
+    const newMovie = {
+      imdbID: selectedId,
+      Title: title,
+      Year: released?.split(" ").at(-1),
+      Poster: poster,
+      imdbRating: Number(imdbRating),
+      runtime: Number(runTime.split(" ").at(0)),
+      userRating,
+    };
 
+    onAddWatched(newMovie);
+  }
   useEffect(() => {
     const controller = new AbortController();
 
@@ -407,7 +435,16 @@ function SelectedMovie({ selectedId, onClose }) {
 
       <section className="p-6 space-y-4">
         <div className="rating">
-          <StarRating maxRating={10} />
+          <StarRating
+            maxRating={10}
+            value={userRating}
+            onChange={setUserRating}
+          />
+          {userRating > 0 && (
+            <button className="btn-add" onClick={handleAdd}>
+              + Add to list{" "}
+            </button>
+          )}
         </div>
 
         <p className="text-sm leading-relaxed">
@@ -425,3 +462,4 @@ function SelectedMovie({ selectedId, onClose }) {
     </div>
   );
 }
+
