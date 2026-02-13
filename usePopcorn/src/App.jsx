@@ -386,6 +386,14 @@ function SelectedMovie({ selectedId, onClose, onAddWatched, watched }) {
 
     onAddWatched(newMovie);
   }
+useEffect(() => {
+  if (!title) return;
+  document.title = `Movie | ${title}`;
+
+  return () => {
+    document.title = "usePopcorn";
+  };
+}, [title]);
 
   useEffect(() => {
     const controller = new AbortController();
