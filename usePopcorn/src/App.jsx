@@ -74,7 +74,7 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("watched", JSON.stringify(watched));
   }, [watched]);
-
+ const controller = new AbortController();
   useEffect(() => {
     async function fetchMovies() {
       if (query.length < 3) {
@@ -91,6 +91,9 @@ export default function App() {
 
         const res = await fetch(
           `https://www.omdbapi.com/?apikey=${apiKey}&s=${query}`,
+          {
+            signal: controller.signal,
+          },
         );
         const data = await res.json();
 
@@ -101,14 +104,19 @@ export default function App() {
           setError("Something went wrong");
         }
       } catch (err) {
-        console.error(err);
-        setMovies([]);
+        if (err.name !== "AbortError") {
+          setError(err.message);
+        }
+        
       } finally {
         setIsLoading(false); // ✅ ALWAYS stop loader
       }
     }
 
     fetchMovies();
+    return () => {
+      controller.abort();
+    };
   }, [query]);
 
   // console.log(apiKey);
@@ -345,14 +353,14 @@ function Loader() {
   return <p className="loader">Loading...</p>;
 }
 
-function Error() {
+function Error({ message }) {
   return (
     <p className="text-4xl flex justify-center items-center">
-      {" "}
-      ⚔️ Movie Not Found🚩
+      ⚔️ {message || "Movie Not Found"} 🚩
     </p>
   );
 }
+
 
 function SelectedMovie({ selectedId, onClose, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
