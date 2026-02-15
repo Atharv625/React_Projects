@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 import StarRating from "./Component/StarRating";
 const tempMovieData = [
@@ -74,7 +74,7 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("watched", JSON.stringify(watched));
   }, [watched]);
- const controller = new AbortController();
+  const controller = new AbortController();
   useEffect(() => {
     async function fetchMovies() {
       if (query.length < 3) {
@@ -107,7 +107,6 @@ export default function App() {
         if (err.name !== "AbortError") {
           setError(err.message);
         }
-        
       } finally {
         setIsLoading(false); // ✅ ALWAYS stop loader
       }
@@ -148,6 +147,21 @@ export default function App() {
 }
 
 function Search({ query, setQuery }) {
+  const inputEl = useRef(null);
+  useEffect(() => {
+    function callback(e) {
+      if (document.activeElement === inputEl.current) return;
+
+      if (e.code === "Enter") {
+        inputEl.current.focus();
+        setQuery("");
+      }
+    }
+
+    document.addEventListener("keydown", callback);
+    return () => document.removeEventListener("keydown", callback);
+  }, [setQuery]); // empty dependency array
+
   return (
     <input
       className="search"
@@ -155,6 +169,7 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEl}
     />
   );
 }
@@ -361,7 +376,6 @@ function Error({ message }) {
   );
 }
 
-
 function SelectedMovie({ selectedId, onClose, onAddWatched, watched }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -369,7 +383,15 @@ function SelectedMovie({ selectedId, onClose, onAddWatched, watched }) {
   const [userRating, setUserRating] = useState(0);
   const isWatched = watched.some((movie) => movie.imdbID === selectedId);
   const watchedMovie = watched.find((movie) => movie.imdbID === selectedId);
-
+  const countRef = useRef(0);
+  useEffect(
+    function () {
+      if (userRating) {
+        countRef.current += 1;
+      }
+    },
+    [userRating],
+  );
   const {
     Title: title,
     Poster: poster,
@@ -394,14 +416,14 @@ function SelectedMovie({ selectedId, onClose, onAddWatched, watched }) {
 
     onAddWatched(newMovie);
   }
-useEffect(() => {
-  if (!title) return;
-  document.title = `Movie | ${title}`;
+  useEffect(() => {
+    if (!title) return;
+    document.title = `Movie | ${title}`;
 
-  return () => {
-    document.title = "usePopcorn";
-  };
-}, [title]);
+    return () => {
+      document.title = "usePopcorn";
+    };
+  }, [title]);
 
   useEffect(() => {
     const controller = new AbortController();
