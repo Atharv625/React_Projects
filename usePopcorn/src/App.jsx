@@ -313,7 +313,7 @@ function WatchBox({
               </p>
               <p>
                 <span>⭐️</span>
-                <span>{avgImdbRating}</span>
+                <span>{Number(avgImdbRating.toFixed(2))}</span>
               </p>
               <p>
                 <span>🌟</span>
@@ -321,7 +321,7 @@ function WatchBox({
               </p>
               <p>
                 <span>⏳</span>
-                <span>{avgRuntime} min</span>
+                <span>{Number(avgRuntime.toFixed(2))} min</span>
               </p>
             </div>
           </div>
