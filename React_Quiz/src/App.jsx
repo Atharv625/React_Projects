@@ -1,7 +1,12 @@
-import React from "react";
+import DateCounter from "./DateCounter";
+import Header from "./Header";
 
 const App = () => {
-  return <div>App</div>;
+  return (
+    <div className="app">
+      <Header />
+    </div>
+  );
 };
 
 export default App;
