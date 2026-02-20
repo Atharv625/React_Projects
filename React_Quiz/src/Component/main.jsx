@@ -1,7 +1,5 @@
-import React from "react";
-
-const main = ({ children }) => {
-  return <main className="main"></main>;
+const Main = ({ children }) => {
+  return <main className="main">{children}</main>;
 };
 
-export default main;
+export default Main;
